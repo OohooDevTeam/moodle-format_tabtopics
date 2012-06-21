@@ -1,0 +1,20 @@
+.yui3-skin-sam .yui3-tab-label#marker {
+    background:#d8d8d8 url(sprite.png) repeat-x left -1350px; /* tab background */
+
+}
+
+.yui3-skin-sam .yui3-tab-label:hover#marker,
+.yui3-skin-sam .yui3-tab-label:focus#marker{
+    background:#bfdaff url(sprite.png) repeat-x left -1350px; /* hovered tab background */
+    outline:0;
+}
+
+.yui3-skin-sam .yui3-tab-selected .yui3-tab-label#marker,
+.yui3-skin-sam .yui3-tab-selected .yui3-tab-label#marker{ /* no hover effect for selected */
+    background:#2647a0 url(sprite.png) repeat-x left -1400px; /* selected tab background */
+    color:#fff;
+}
+
+.yui3-skin-sam .yui3-tab-selected #marker{
+    margin-bottom: 1px; /* for overlap (mapped to tabview-list border-width) */
+}
