@@ -28,16 +28,18 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/completionlib.php');
 $PAGE->requires->js('/course/format/tabtopic/module.js');
+$PAGE->requires->js('/course/format/tabtopic/js/jquery-1.7.1.js');
+$PAGE->requires->js('/course/format/tabtopic/js/jquery-ui-1.8.18.custom.min.js');
 
 $jsmodule = array(
     'name' => 'weekstabs',
     'fullpath' => '/course/format/tabtopic/module.js',
     'requires' => array('base', 'node', 'json', 'io')
 );
-?>    
+?>
 <style type="text/css" media="screen">
     /* <![CDATA[ */
-    @import url(<?php echo $CFG->wwwroot ?>/course/format/tabtopic/tabtop.css);
+    @import url(<?php echo $CFG->wwwroot ?>/course/format/tabtopic/css/red-theme/jquery-ui-1.8.21.custom.css);
     /* ]]> */
 </style>
 
@@ -47,18 +49,18 @@ $topic = optional_param('topic', -1, PARAM_INT);
 //THIS IS THE CODE FOR GENERATING THE TABVIEW. ITS ONLY USED DURING NON EDITING
 if (!$PAGE->user_is_editing()) {
     echo '
-        
+
 <!--[if IE]>
 <div id = "maincontainer" style="display:">
 <![endif]-->
-        
+
 <!--[if !IE]> <-->
 <div id = "maincontainer" style="display:none">
 <!--> <![endif]-->
 
 ';
 
-    
+
     if ($topic != -1) {
         $displaysection = course_set_display($course->id, $topic);
     } else {
@@ -97,7 +99,6 @@ if (!$PAGE->user_is_editing()) {
 //echo $OUTPUT->heading(get_string('topicoutline'), 2, 'headingblock header outline');
 // Note, an ordered list would confuse - "1" could be the clipboard or summary.
 
-    echo "<ul class='topicstabs'>\n";
 
 /// If currently moving a file then show the current clipboard
 //not too sure what this does
@@ -108,7 +109,6 @@ if (!$PAGE->user_is_editing()) {
         echo $stractivityclipboard . '&nbsp;&nbsp;(<a href="mod.php?cancelcopy=true&amp;sesskey=' . sesskey() . '">' . $strcancel . '</a>)';
         echo "</li>\n";
     }
-    echo '</ul>';
 
 
 /// Now all the normal modules by topic
@@ -119,7 +119,6 @@ if (!$PAGE->user_is_editing()) {
     $section = 1;
     $sectionmenu = array();
     $num = 1;
-    echo '<div id="sections">'; //this is the first div that yui looks at, top node
 
     echo '<ul>'; //begining of the unordered list
     while ($section <= $course->numsections) {
@@ -139,7 +138,7 @@ if (!$PAGE->user_is_editing()) {
         //print_object($course);
         // print_object($thissection);
         // if ($thissection->visible) {
-        //this will set the name of undefined sections to a number. 
+        //this will set the name of undefined sections to a number.
 
         if ($secname == null) {
             $secname = $secname . $num;
@@ -155,16 +154,14 @@ if (!$PAGE->user_is_editing()) {
 
 
 
-                
+
 //echo '</li>'; //closes each one
         }
         $section++;
     }
     echo '</ul>';
-//echo '</div>'; //closes 
 
 
-    echo '<div>'; //should be the div for content. 
 //this is the actual bits that we need.
     $section = 1;
     $sectionmenu = array();
@@ -210,7 +207,7 @@ if (!$PAGE->user_is_editing()) {
             }
             //the default action is to set the name of each topic to null.
             $secname = $thissection->name;
-            //this will set the name of undefined sections to a number. 
+            //this will set the name of undefined sections to a number.
             if ($secname == null) {
                 $secname = $secname . $num;
                 $num++;
@@ -298,8 +295,6 @@ if (!$PAGE->user_is_editing()) {
         unset($sections[$section]);
         $section++;
     }
-    echo '</div>';
-    echo '</div>';
     echo '</div>';
 
     if (!$displaysection and $PAGE->user_is_editing() and has_capability('moodle/course:update', get_context_instance(CONTEXT_COURSE, $course->id))) {
@@ -497,7 +492,7 @@ else {
             // Note, 'right side' is BEFORE content.
             echo '<div class="right side">';
 
-            
+
 
 
             echo '</div>';
@@ -579,7 +574,7 @@ else {
 /*?>
 
  <script type="text/javascript" language="javascript">
-    
+
      //document.body.onload = function(){lol();}
     //window.onload = lol();
     addonload(function() {document.getElementById("container").style="display:visible"});
