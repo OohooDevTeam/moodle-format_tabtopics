@@ -8,7 +8,9 @@ M.tabtopic={
         $("#maincontainer").tabs();
 
         $(document).ready(function() {
-            $("#maincontainer").children("div").css("border", "1px solid #243356");
+            //Put a border around each container
+            $("#maincontainer").children("div").css("border", "1px solid black");
+            //Add a bar under the tabs which has the same color as the selected tab
             $("<div></div>").css({
                 height: '5px',
                 width: '100%',
