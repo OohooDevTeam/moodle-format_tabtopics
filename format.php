@@ -37,9 +37,9 @@ $jsmodule = array(
     'requires' => array('base', 'node', 'json', 'io')
 );
 ?>
-<style type="text/css" media="screen">
+<style type="text/css">
     /* <![CDATA[ */
-    @import url(<?php echo $CFG->wwwroot ?>/course/format/tabtopic/css/red-theme/jquery-ui-1.8.21.custom.css);
+    @import url(<?php echo $CFG->wwwroot ?>/course/format/tabtopic/css/jquery-ui-1.8.21.custom.css);
     /* ]]> */
 </style>
 
@@ -147,9 +147,9 @@ if (!$PAGE->user_is_editing()) {
 
         if (has_capability('moodle/course:viewhiddensections', $context) || $thissection->visible) {   // Hidden for students
             if ($course->marker == $section)
-                echo '<li id ="marker" class="markerselected"><a href="#section-' . $secname . '" id = "marker" class="markerselected">' . $secname . '</a></li>';
+                echo '<li id ="marker" class="markerselected"><a href="#section-' . $section . '" id = "marker" class="markerselected">' . $secname . '</a></li>';
             else
-                echo '<li><a href="#section-' . $secname . '">' . $secname . '</a></li>'; //prints each sectio
+                echo '<li><a href="#section-' . $section . '">' . $secname . '</a></li>'; //prints each sectio
 
 
 
@@ -215,7 +215,7 @@ if (!$PAGE->user_is_editing()) {
 
             if (has_capability('moodle/course:viewhiddensections', $context) || $thissection->visible) {
 
-                echo '<div id="section-' . $secname . '">';
+                echo '<div id="section-' . $section . '">';
                 //echo '<div class="left side">' . $currenttext . $section . '</div>';
                 // Note, 'right side' is BEFORE content.
                 echo '<div class="right side">';
