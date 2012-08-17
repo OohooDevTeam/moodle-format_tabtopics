@@ -29,8 +29,7 @@
  *
  * @return bool Returns true
  */
-
-function callback_tabtopic_uses_sections() {
+function callback_tabtopics_uses_sections() {
     return true;
 }
 
@@ -44,8 +43,8 @@ function callback_tabtopic_uses_sections() {
  * @param stdClass $modinfo The mod info object for the current course
  * @return bool Returns true
  */
-function callback_tabtopic_load_content(&$navigation, $course, $coursenode) {
-    return $navigation->load_generic_course_sections($course, $coursenode, 'tabtopic');
+function callback_tabtopics_load_content(&$navigation, $course, $coursenode) {
+    return $navigation->load_generic_course_sections($course, $coursenode, 'tabtopics');
 }
 
 /**
@@ -54,26 +53,16 @@ function callback_tabtopic_load_content(&$navigation, $course, $coursenode) {
  *
  * @return string
  */
-function callback_tabtopic_definition() {
+function callback_tabtopics_definition() {
     return get_string('topic');
 }
 
-/**
- * The GET argument variable that is used to identify the section being
- * viewed by the user (if there is one)
- *
- * @return string
- */
-function callback_tabtopic_request_key() {
-    return 'topic';
-}
-
-function callback_tabtopic_get_section_name($course, $section) {
+function callback_tabtopics_get_section_name($course, $section) {
     // We can't add a node without any text
-    if (!empty($section->name)) {
-        return $section->name;
+    if ((string)$section->name !== '') {
+        return format_string($section->name, true, array('context' => get_context_instance(CONTEXT_COURSE, $course->id)));
     } else if ($section->section == 0) {
-        return get_string('section0name', 'format_tabtopic');
+        return get_string('section0name', 'format_tabtopics');
     } else {
         return get_string('topic').' '.$section->section;
     }
@@ -85,9 +74,30 @@ function callback_tabtopic_get_section_name($course, $section) {
  * @see course_format_ajax_support()
  * @return stdClass
  */
-function callback_tabtopic_ajax_support() {
+function callback_tabtopics_ajax_support() {
     $ajaxsupport = new stdClass();
     $ajaxsupport->capable = true;
     $ajaxsupport->testedbrowsers = array('MSIE' => 6.0, 'Gecko' => 20061111, 'Safari' => 531, 'Chrome' => 6.0);
     return $ajaxsupport;
+}
+
+/**
+ * Callback function to do some action after section move
+ *
+ * @param stdClass $course The course entry from DB
+ * @return array This will be passed in ajax respose.
+ */
+function callback_tabtopics_ajax_section_move($course) {
+    global $COURSE, $PAGE;
+
+    $titles = array();
+    rebuild_course_cache($course->id);
+    $modinfo = get_fast_modinfo($COURSE);
+    $renderer = $PAGE->get_renderer('format_tabtopics');
+    if ($renderer && ($sections = $modinfo->get_section_info_all())) {
+        foreach ($sections as $number => $section) {
+            $titles[$number] = $renderer->section_title($section, $course);
+        }
+    }
+    return array('sectiontitles' => $titles, 'action' => 'move');
 }
