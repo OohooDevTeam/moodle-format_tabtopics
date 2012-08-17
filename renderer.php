@@ -1,31 +1,24 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/* * **********************************************************************
+ * *                     TabTopics Course Format                         **
+ * ************************************************************************
+ * @package     format                                                   **
+ * @subpackage  tabtopics                                                **
+ * @name        TabTopics                                                **
+ * @copyright   oohoo.biz                                                **
+ * @link        http://oohoo.biz                                         **
+ * @author      Braedan Jongerius <jongeriu@ualberta.ca>                 **
+ * @author      N.D.Freear@open.ac.uk, and others. (Original authors)    **
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later **
+ * ************************************************************************
+ * ********************************************************************** */
 
 /**
  * Renderer for outputting the tabtopics course format.
- *
- * @package format_tabtopics
- * @copyright 2012 Dan Poltawski
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @since Moodle 2.3
  */
-
-
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->dirroot.'/course/format/renderer.php');
+require_once($CFG->dirroot . '/course/format/renderer.php');
 
 /**
  * Basic renderer for tabtopics format.
@@ -44,11 +37,40 @@ class format_tabtopics_renderer extends format_section_renderer_base {
     }
 
     /**
+     * Generate the starting container html for a list of sections using tabs
+     * @param stdClass $course The course entry from DB
+     * @param array $sections The course_sections entries from the DB
+     * @return string HTML to output.
+     */
+    protected function start_section_list_tabs($course, $sections) {
+        $o = html_writer::start_tag('div', array('class' => 'topics'));
+        $o.= html_writer::start_tag('ul');
+        $sectionnum = 0;
+        foreach ($sections as $section) {
+            if ($section->uservisible && $sectionnum <= $course->numsections) {
+                $o.= '<li><a href="#section-' . $section->section . '">' . $this->section_title($section, $course) . "</a></li>";
+            }
+            $sectionnum++;
+        }
+        $o.= html_writer::end_tag('ul');
+
+        return $o;
+    }
+
+    /**
      * Generate the closing container html for a list of sections
      * @return string HTML to output.
      */
     protected function end_section_list() {
         return html_writer::end_tag('ul');
+    }
+
+    /**
+     * Generate the closing container html for a list of sections using tabs
+     * @return string HTML to output.
+     */
+    protected function end_section_list_tabs() {
+        return html_writer::end_tag('div');
     }
 
     /**
@@ -88,16 +110,12 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         $controls = array();
         if ($course->marker == $section->section) {  // Show the "light globe" on/off.
             $url->param('marker', 0);
-            $controls[] = html_writer::link($url,
-                                html_writer::empty_tag('img', array('src' => $this->output->pix_url('i/marked'),
-                                    'class' => 'icon ', 'alt' => get_string('markedthistopic'))),
-                                array('title' => get_string('markedthistopic'), 'class' => 'editing_highlight'));
+            $controls[] = html_writer::link($url, html_writer::empty_tag('img', array('src' => $this->output->pix_url('i/marked'),
+                                'class' => 'icon ', 'alt' => get_string('markedthistopic'))), array('title' => get_string('markedthistopic'), 'class' => 'editing_highlight'));
         } else {
             $url->param('marker', $section->section);
-            $controls[] = html_writer::link($url,
-                            html_writer::empty_tag('img', array('src' => $this->output->pix_url('i/marker'),
-                                'class' => 'icon', 'alt' => get_string('markthistopic'))),
-                            array('title' => get_string('markthistopic'), 'class' => 'editing_highlight'));
+            $controls[] = html_writer::link($url, html_writer::empty_tag('img', array('src' => $this->output->pix_url('i/marker'),
+                                'class' => 'icon', 'alt' => get_string('markthistopic'))), array('title' => get_string('markthistopic'), 'class' => 'editing_highlight'));
         }
 
         return array_merge($controls, parent::section_edit_controls($course, $section, $onsectionpage));
@@ -125,18 +143,22 @@ class format_tabtopics_renderer extends format_section_renderer_base {
         echo $this->course_activity_clipboard($course);
 
         // Now the list of sections..
-        echo $this->start_section_list();
+        if (!$PAGE->user_is_editing()) {
+            echo $this->start_section_list_tabs($course, $sections);
+        } else {
+            echo $this->start_section_list();
+        }
 
         // General section if non-empty.
         $thissection = $sections[0];
         unset($sections[0]);
         if ($thissection->summary or $thissection->sequence or $PAGE->user_is_editing()) {
-            echo $this->section_header($thissection, $course, true);
+            echo $this->section_header_tabs($thissection, $course, true);
             print_section($course, $thissection, $mods, $modnamesused, true);
             if ($PAGE->user_is_editing()) {
                 print_section_add_menus($course, 0, $modnames);
             }
-            echo $this->section_footer();
+            echo $this->section_footer_tabs();
         }
 
         $canviewhidden = has_capability('moodle/course:viewhiddensections', $context);
@@ -159,12 +181,6 @@ class format_tabtopics_renderer extends format_section_renderer_base {
             $showsection = $thissection->uservisible ||
                     ($thissection->visible && !$thissection->available && $thissection->showavailability);
             if (!$showsection) {
-                // Hidden section message is overridden by 'unavailable' control
-                // (showavailability option).
-                if (!$course->hiddensections && $thissection->available) {
-                    echo $this->section_hidden($section);
-                }
-
                 unset($sections[$section]);
                 continue;
             }
@@ -173,14 +189,22 @@ class format_tabtopics_renderer extends format_section_renderer_base {
                 // Display section summary only.
                 echo $this->section_summary($thissection, $course, $mods);
             } else {
-                echo $this->section_header($thissection, $course, false);
+                if (!$PAGE->user_is_editing()) {
+                    echo $this->section_header_tabs($thissection, $course, false);
+                } else {
+                    echo $this->section_header($thissection, $course, false);
+                }
                 if ($thissection->uservisible) {
                     print_section($course, $thissection, $mods, $modnamesused);
                     if ($PAGE->user_is_editing()) {
                         print_section_add_menus($course, $section, $modnames);
                     }
                 }
-                echo $this->section_footer();
+                if (!$PAGE->user_is_editing()) {
+                    echo $this->section_footer_tabs();
+                } else {
+                    echo $this->section_footer();
+                }
             }
 
             unset($sections[$section]);
@@ -205,32 +229,31 @@ class format_tabtopics_renderer extends format_section_renderer_base {
             // Increase number of sections.
             $straddsection = get_string('increasesections', 'moodle');
             $url = new moodle_url('/course/changenumsections.php',
-                array('courseid' => $course->id,
-                      'increase' => true,
-                      'sesskey' => sesskey()));
+                            array('courseid' => $course->id,
+                                'increase' => true,
+                                'sesskey' => sesskey()));
             $icon = $this->output->pix_icon('t/switch_plus', $straddsection);
-            echo html_writer::link($url, $icon.get_accesshide($straddsection), array('class' => 'increase-sections'));
+            echo html_writer::link($url, $icon . get_accesshide($straddsection), array('class' => 'increase-sections'));
 
             if ($course->numsections > 0) {
                 // Reduce number of sections sections.
                 $strremovesection = get_string('reducesections', 'moodle');
                 $url = new moodle_url('/course/changenumsections.php',
-                    array('courseid' => $course->id,
-                          'increase' => false,
-                          'sesskey' => sesskey()));
+                                array('courseid' => $course->id,
+                                    'increase' => false,
+                                    'sesskey' => sesskey()));
                 $icon = $this->output->pix_icon('t/switch_minus', $strremovesection);
-                echo html_writer::link($url, $icon.get_accesshide($strremovesection), array('class' => 'reduce-sections'));
+                echo html_writer::link($url, $icon . get_accesshide($strremovesection), array('class' => 'reduce-sections'));
             }
 
             echo html_writer::end_tag('div');
         } else {
-            echo $this->end_section_list();
+            echo $this->end_section_list_tabs();
         }
-
     }
 
     /**
-     * Generate the display of the header part of a section before
+     * Generate the display of the header part of a section using tabs before
      * course modules are included
      *
      * @param stdClass $section The course_section entry from DB
@@ -238,7 +261,7 @@ class format_tabtopics_renderer extends format_section_renderer_base {
      * @param bool $onsectionpage true if being printed on a single-section page
      * @return string HTML to output.
      */
-    protected function section_header($section, $course, $onsectionpage) {
+    protected function section_header_tabs($section, $course, $onsectionpage) {
         global $PAGE;
 
         $o = '';
@@ -254,8 +277,8 @@ class format_tabtopics_renderer extends format_section_renderer_base {
             }
         }
 
-        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section,
-            'class' => 'section main clearfix'.$sectionstyle));
+        $o.= html_writer::start_tag('div', array('id' => 'section-' . $section->section,
+                    'class' => 'section main clearfix' . $sectionstyle));
 
         $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
         $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
@@ -273,15 +296,13 @@ class format_tabtopics_renderer extends format_section_renderer_base {
 
         $context = context_course::instance($course->id);
         if ($PAGE->user_is_editing() && has_capability('moodle/course:update', $context)) {
-            $url = new moodle_url('/course/editsection.php', array('id'=>$section->id));
+            $url = new moodle_url('/course/editsection.php', array('id' => $section->id));
 
             if ($onsectionpage) {
                 $url->param('sectionreturn', 1);
             }
 
-            $o.= html_writer::link($url,
-                html_writer::empty_tag('img', array('src' => $this->output->pix_url('t/edit'), 'class' => 'iconsmall edit')),
-                array('title' => get_string('editsummary')));
+            $o.= html_writer::link($url, html_writer::empty_tag('img', array('src' => $this->output->pix_url('t/edit'), 'class' => 'iconsmall edit')), array('title' => get_string('editsummary')));
         }
         $o.= html_writer::end_tag('div');
 
@@ -291,15 +312,15 @@ class format_tabtopics_renderer extends format_section_renderer_base {
     }
 
     /**
-     * Generate the display of the footer part of a section
+     * Generate the display of the footer part of a section using tabs
      *
      * @return string HTML to output.
      */
-    protected function section_footer() {
+    protected function section_footer_tabs() {
         $o = html_writer::end_tag('div');
-        $o.= html_writer::end_tag('li');
+        $o.= html_writer::end_tag('div');
 
         return $o;
     }
-    
+
 }

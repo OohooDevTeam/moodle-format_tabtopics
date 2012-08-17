@@ -1,3 +1,16 @@
+/* * **********************************************************************
+ * *                     TabTopics Course Format                         **
+ * ************************************************************************
+ * @package     format                                                   **
+ * @subpackage  tabtopics                                                **
+ * @name        TabTopics                                                **
+ * @copyright   oohoo.biz                                                **
+ * @link        http://oohoo.biz                                         **
+ * @author      Braedan Jongerius <jongeriu@ualberta.ca>                 **
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later **
+ * ************************************************************************
+ * ********************************************************************** */
+
 // Javascript functions for TabTopics course format
 
 M.course = M.course || {};
