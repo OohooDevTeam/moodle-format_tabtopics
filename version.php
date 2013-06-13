@@ -11,6 +11,7 @@
  * @link        http://oohoo.biz                                          **
  * @author      Nicolas Bretin                                            **
  * @author      Braedan Jongerius                                         **
+ * @author      Dustin Durand                                             **
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later  **
  * *************************************************************************
  * ************************************************************************ */

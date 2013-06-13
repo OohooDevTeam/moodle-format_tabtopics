@@ -21,9 +21,6 @@ M.tabtopics =
                 {
                     //cookie name for tab state
                     var state_cookie = "moodle_course_format_tabtopics_course_";
-                   
-                    //number of tabs
-                    var tab_count = Y.all('#sections').length;
                     
                     var tabview = new Y.TabView(
                             {
@@ -67,6 +64,9 @@ M.tabtopics =
                         }
                         counter++;
                     });
+                    
+                    //number of tabs
+                    var tab_count = Y.all('#sections .yui3-tab')._nodes.length;
 
                     //tab selection priority:
                     //URL Identifier > Cookie Setting > Teacher Set Default (marker)
@@ -82,6 +82,7 @@ M.tabtopics =
                     }
                     else
                     {
+
                         //check for saved cookie state for course
                         var value = Y.Cookie.get(state_cookie + courseid);
                         if (value && value < tab_count)
