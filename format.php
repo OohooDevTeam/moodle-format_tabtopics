@@ -136,7 +136,7 @@ if (!$PAGE->user_is_editing())
 
         //if section is not a tab, display as a header
         if(!$isZeroTab) {
-            echo $corerenderer->course_section_cm_list($course, $thissection);
+            print_section($course, $thissection, $mods, $modnamesused);
         }
         
         echo '</div>';
@@ -175,9 +175,10 @@ if (!$PAGE->user_is_editing())
         }
         
         //check if the current section is visible to user
-        $user_access = course_get_format($course)->is_unavailable_override($thissection);
+        $unaval_override = course_get_format($course)->is_unavailable_override($thissection);
+        
         //check if override is turned on (informs user section not avaliable)
-        $unaval_override = course_get_format($course)->check_user_access($thissection);
+        $user_access = course_get_format($course)->check_user_access($thissection);
         
         //if don't have access AND override "not avaliable" message not on - slip tab
         if(!$user_access && !$unaval_override) { 
@@ -195,7 +196,7 @@ if (!$PAGE->user_is_editing())
             $num++;
         }
 
-        if (has_capability('moodle/course:viewhiddensections', $context) || $thissection->visible)
+        if (has_capability('moodle/course:viewhiddensections', $context) || $thissection->visible || (!$thissection->visible && $unaval_override))
         {   // Hidden for students
             if ($course->marker == $section)
                 echo '<li id ="marker" class="markerselected"><a href="#section-' . $section . '" id = "marker" class="markerselected">' . $secname . '</a></li>';
@@ -244,8 +245,15 @@ if (!$PAGE->user_is_editing())
         
         //if user doesn't have access, but override is present - display not avaliable message
         if(!$user_access && $unaval_override){
-            echo '<li>' + $tabtopicsrenderer->section_hidden($section) + '</li>';
-            $section++;
+            echo '<div id="section-' . $section . '">';
+	    echo '<div class="right side"></div>';
+
+            echo '<div class="content">';
+            echo $tabtopicsrenderer->section_hidden($section);
+	    echo '</div>';
+	    echo '</div>';
+            
+	    $section++;
             continue;
         }
 
@@ -371,12 +379,12 @@ if (!$PAGE->user_is_editing())
                     echo '</div>';
 
                     
-                    echo $corerenderer->course_section_cm_list($course, $section);
+                    print_section($course, $thissection, $mods, $modnamesused);
                     
                     echo '<br />';
                     if ($PAGE->user_is_editing())
                     {
-                        echo $corerenderer->course_section_cm_list($course, $section);
+                       print_section_add_menus($course, $section, $modnames);
                     }
                     
                     
@@ -420,7 +428,7 @@ if (!$PAGE->user_is_editing())
             echo '<div class="content">';
             echo $OUTPUT->heading(get_string('orphanedactivities'), 3, 'sectionname');
             
-            echo $corerenderer->course_section_cm_list($course, $thissection);
+            print_section($course, $thissection, $mods, $modnamesused);
             
             echo '</div>';
             echo "</li>\n";
