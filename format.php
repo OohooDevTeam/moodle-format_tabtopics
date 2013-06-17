@@ -175,9 +175,10 @@ if (!$PAGE->user_is_editing())
         }
         
         //check if the current section is visible to user
-        $user_access = course_get_format($course)->is_unavailable_override($thissection);
+        $unaval_override = course_get_format($course)->is_unavailable_override($thissection);
+        
         //check if override is turned on (informs user section not avaliable)
-        $unaval_override = course_get_format($course)->check_user_access($thissection);
+        $user_access = course_get_format($course)->check_user_access($thissection);
         
         //if don't have access AND override "not avaliable" message not on - slip tab
         if(!$user_access && !$unaval_override) { 
@@ -195,7 +196,7 @@ if (!$PAGE->user_is_editing())
             $num++;
         }
 
-        if (has_capability('moodle/course:viewhiddensections', $context) || $thissection->visible)
+        if (has_capability('moodle/course:viewhiddensections', $context) || $thissection->visible || (!$thissection->visible && $unaval_override))
         {   // Hidden for students
             if ($course->marker == $section)
                 echo '<li id ="marker" class="markerselected"><a href="#section-' . $section . '" id = "marker" class="markerselected">' . $secname . '</a></li>';
@@ -244,8 +245,15 @@ if (!$PAGE->user_is_editing())
         
         //if user doesn't have access, but override is present - display not avaliable message
         if(!$user_access && $unaval_override){
-            echo '<li>' + $tabtopicsrenderer->section_hidden($section) + '</li>';
-            $section++;
+            echo '<div id="section-' . $section . '">';
+	    echo '<div class="right side"></div>';
+
+            echo '<div class="content">';
+            echo $tabtopicsrenderer->section_hidden($section);
+	    echo '</div>';
+	    echo '</div>';
+            
+	    $section++;
             continue;
         }
 
