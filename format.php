@@ -247,7 +247,6 @@ if (!$PAGE->user_is_editing())
         if(!$user_access && $unaval_override){
             echo '<div id="section-' . $section . '">';
 	    echo '<div class="right side"></div>';
-
             echo '<div class="content">';
             echo $tabtopicsrenderer->section_hidden($section);
 	    echo '</div>';
