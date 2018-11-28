@@ -29,3 +29,4 @@ $string['showalltopics'] = 'Show all topics';
 
 $string['tabtopics_zero_as_tab'] = 'Zero Section As Tab';
 $string['tabtopics_zero_as_tab_help'] = 'Should section 0 of the course be a tab? If no, then it will be displayed at the top of the course at all times.';
+$string['privacy:metadata'] = 'Tab topic course format does not store any personal data.';
