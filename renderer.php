@@ -102,14 +102,13 @@ class format_tabtopics_renderer extends format_section_renderer_base
     public function section_availability_message($section, $canViewHidden) {
         echo parent::section_availability_message($section, $canViewHidden);
     }
-    
+
     /**
      * Display a hidden section message
-     * 
+     *
      * @param type $section
      */
-    public function section_hidden($section) {
-        echo parent::section_hidden($section);
+    public function section_hidden($sectionno, $courseorid = null) {
+        echo parent::section_hidden($sectionno, $courseorid = null);
     }
-    
 }
